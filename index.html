@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUD Vision | نمایشگر هد آپ برای خودروی شما</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0e1d, #1a1f38);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Particle Background */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 12, 28, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #40e0d0;
+            text-decoration: none;
+        }
+        
+        .logo i {
+            color: #00b4d8;
+            font-size: 2.2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #e0e0ff;
+            font-weight: 500;
+            font-size: 1.1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: #40e0d0;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(90deg, #40e0d0, #00b4d8);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(90deg, #00b4d8, #40e0d0);
+            color: #0a0c1c;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 15rem 5% 8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(90deg, #ffffff, #40e0d0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #b0b0ff;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .hero-image {
+            position: relative;
+            width: 45%;
+            perspective: 1000px;
+        }
+        
+        .hud-display {
+            width: 100%;
+            background: rgba(20, 25, 60, 0.7);
+            border: 1px solid rgba(64, 224, 208, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            transform: rotateY(-5deg) rotateX(10deg);
+            transition: transform 0.5s ease;
+            aspect-ratio: 1/1;
+        }
+        
+        .hud-display:hover {
+            transform: rotateY(0) rotateX(0);
+        }
+        
+        .hud-glass {
+            position: relative;
+            padding: 2rem;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 15, 40, 0.7), rgba(30, 35, 70, 0.5));
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hud-glass::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(64, 224, 208, 0.1), transparent);
+            animation: hudGlow 4s linear infinite;
+        }
+        
+        .hud-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hud-speed {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #40e0d0;
+            text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            letter-spacing: -5px;
+            text-align: center;
+            line-height: 1;
+        }
+        
+        .speed-label {
+            font-size: 1.5rem;
+            color: #b0b0ff;
+            text-align: center;
+            margin-top: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 8rem 5%;
+            background: rgba(15, 18, 40, 0.6);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 5rem;
+            background: linear-gradient(90deg, #40e0d0, #00b4d8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #40e0d0, #00b4d8);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .feature-card {
+            background: rgba(25, 30, 60, 0.7);
+            border-radius: 15px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(64, 224, 208, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #40e0d0, #00b4d8);
+        }
+        
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: #40e0d0;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        
+        .feature-card p {
+            color: #b0b0ff;
+            line-height: 1.7;
+        }
+        
+        /* Demo Section */
+        .demo {
+            padding: 8rem 5%;
+            text-align: center;
+            position: relative;
+        }
+        
+        .demo-video {
+            width: 80%;
+            max-width: 900px;
+            height: 500px;
+            margin: 3rem auto 0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(64, 224, 208, 0.3);
+            position: relative;
+        }
+        
+        .demo-video::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 180, 216, 0.1), rgba(64, 224, 208, 0.1));
+            z-index: 1;
+        }
+        
+        .demo-placeholder {
+            background: linear-gradient(135deg, #1a1f38, #0c0e1d);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #40e0d0;
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 5rem 5% 2rem;
+            background: rgba(10, 12, 28, 0.9);
+            position: relative;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #40e0d0;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        
+        .footer-about p {
+            color: #b0b0ff;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1.2rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(64, 224, 208, 0.1);
+            color: #40e0d0;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: #40e0d0;
+            color: #0a0c1c;
+            transform: translateY(-5px);
+        }
+        
+        .footer-title {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #40e0d0, #00b4d8);
+            border-radius: 3px;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            text-decoration: none;
+            color: #b0b0ff;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .footer-links a:hover {
+            color: #40e0d0;
+            transform: translateX(5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b0b0ff;
+            font-size: 1rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes hudGlow {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 10px rgba(64, 224, 208, 0.8);
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes speedChange {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 30px rgba(64, 224, 208, 1);
+            }
+            100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero {
+                flex-direction: column;
+                padding-top: 10rem;
+                gap: 3rem;
+            }
+            
+            .hero-content, .hero-image {
+                width: 100%;
+                max-width: 700px;
+            }
+            
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .hud-speed {
+                font-size: 6rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hud-glass {
+                min-height: 300px;
+            }
+            
+            .hud-speed {
+                font-size: 4.5rem;
+            }
+            
+            .demo-video {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hud-speed {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo">
+            <i class="fas fa-car"></i>
+            <span>HUD Vision</span>
+        </a>
+        
+        <nav>
+            <ul>
+                <li><a href="#home">خانه</a></li>
+                <li><a href="#features">ویژگی‌ها</a></li>
+                <li><a href="#demo">دمو</a></li>
+                <li><a href="#download">دانلود</a></li>
+                <li><a href="#contact">تماس</a></li>
+            </ul>
+        </nav>
+        
+        <a href="#download" class="cta-button">دانلود رایگان</a>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>نمایشگر هد آپ دیسپلی برای خودروی شما</h1>
+            <p>سرعت خودرو را به صورت زنده و با دقت بالا روی شیشه جلو مشاهده کنید. بدون نیاز به نگاه کردن به پنل خودرو، همیشه سرعت را در خط دید خود داشته باشید.</p>
+            
+            <div class="hero-buttons">
+                <a href="#download" class="cta-button">دانلود برای iOS</a>
+                <a href="#download" class="cta-button" style="background: linear-gradient(90deg, #7b68ee, #6a5acd);">دانلود برای اندروید</a>
+            </div>
+        </div>
+        
+        <div class="hero-image">
+            <div class="hud-display">
+                <div class="hud-glass">
+                    <div class="hud-content">
+                        <div class="hud-speed">85</div>
+                        <div class="speed-label">کیلومتر بر ساعت</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">ویژگی‌های منحصر به فرد</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="feature-icon fas fa-tachometer-alt"></i>
+                <h3>نمایشگر سرعت بزرگ</h3>
+                <p>سرعت خودرو با فونت بسیار بزرگ در مرکز نمایشگر، کاملاً واضح و خوانا حتی در نور روز</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="feature-icon fas fa-sun"></i>
+                <h3>تطبیق با نور محیط</h3>
+                <p>نمایشگر به صورت خودکار با نور محیط تطبیق می‌یابد تا همیشه خوانایی مطلوب داشته باشد</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="feature-icon fas fa-bell"></i>
+                <h3>هشدار سرعت مجاز</h3>
+                <p>هشدار لحظه‌ای هنگام نزدیک شدن به سرعت مجاز جاده‌ها</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="feature-icon fas fa-road"></i>
+                <h3>تشخیص نوع جاده</h3>
+                <p>تشخیص خودکار بزرگراه، آزادراه و جاده‌های شهری و نمایش سرعت مجاز</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="feature-icon fas fa-palette"></i>
+                <h3>رنگ‌های قابل تنظیم</h3>
+                <p>انتخاب از بین ۱۲ رنگ مختلف برای نمایشگر سرعت با توجه به سلیقه شما</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="feature-icon fas fa-battery-full"></i>
+                <h3>مصرف بهینه انرژی</h3>
+                <p>طراحی شده برای مصرف حداقلی باتری تلفن همراه</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <h2 class="section-title">نمایش عملکرد برنامه</h2>
+        
+        <div class="demo-video">
+            <div class="demo-placeholder">
+                <i class="fas fa-play-circle" style="font-size: 4rem;"></i>
+                <p>نمایش ویدئویی از برنامه در حال اجرا</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-about">
+                <a href="#" class="footer-logo">
+                    <i class="fas fa-car"></i> HUD Vision
+                </a>
+                <p>نمایشگر هد آپ پیشرفته برای افزایش ایمنی و راحتی رانندگی. سرعت خودرو را به صورت زنده و در خط دید خود مشاهده کنید.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h3 class="footer-title">لینک‌های سریع</h3>
+                <ul>
+                    <li><a href="#home">صفحه اصلی</a></li>
+                    <li><a href="#features">ویژگی‌ها</a></li>
+                    <li><a href="#demo">دمو</a></li>
+                    <li><a href="#download">دانلود</a></li>
+                    <li><a href="#contact">تماس با ما</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h3 class="footer-title">پشتیبانی</h3>
+                <ul>
+                    <li><a href="#">نصب و راه‌اندازی</a></li>
+                    <li><a href="#">سوالات متداول</a></li>
+                    <li><a href="#">راهنمای استفاده</a></li>
+                    <li><a href="#">گزارش مشکل</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h3 class="footer-title">تماس با ما</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> تهران، خیابان آزادی، پلاک ۱۲۳</li>
+                    <li><i class="fas fa-phone"></i> ۰۲۱-۱۲۳۴۵۶۷۸</li>
+                    <li><i class="fas fa-envelope"></i> info@hudvision.ir</li>
+                    <li><i class="fas fa-clock"></i> شنبه تا چهارشنبه: ۹ صبح تا ۵ عصر</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            © 2025 AmirSoftware. تمامی حقوق محفوظ است.
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize particles background
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#40e0d0" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#00b4d8",
+                    opacity: 0.3,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out"
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+        
+        // Header scroll effect
+        window.addEventListener("scroll", function() {
+            const header = document.querySelector("header");
+            if (window.scrollY > 100) {
+                header.style.padding = "1rem 5%";
+                header.style.background = "rgba(10, 12, 28, 0.95)";
+            } else {
+                header.style.padding = "1.5rem 5%";
+                header.style.background = "rgba(10, 12, 28, 0.8)";
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // HUD speed simulation
+        setInterval(() => {
+            const hudSpeed = document.querySelector('.hud-speed');
+            const currentSpeed = parseInt(hudSpeed.textContent);
+            const newSpeed = Math.floor(Math.random() * 40) + 40;
+            
+            // Animate speed change
+            let speed = currentSpeed;
+            const interval = setInterval(() => {
+                if (speed < newSpeed) speed++;
+                else if (speed > newSpeed) speed--;
+                else clearInterval(interval);
+                
+                hudSpeed.textContent = speed;
+                
+                // Add animation effect when speed changes
+                if (Math.abs(speed - currentSpeed) > 5) {
+                    hudSpeed.style.animation = "speedChange 0.5s ease";
+                    setTimeout(() => {
+                        hudSpeed.style.animation = "";
+                    }, 500);
+                }
+            }, 30);
+        }, 5000);
+    </script>
+</body>
+</html>
