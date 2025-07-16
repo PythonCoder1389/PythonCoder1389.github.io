@@ -1,796 +1,892 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUD Vision | نمایشگر هد آپ برای خودروی شما</title>
+    <title>امیر - برنامه‌نویس پایتون و اندروید</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap">
     <style>
+        :root {
+            --primary: #8a2be2;
+            --primary-dark: #6a1cb9;
+            --secondary: #ff6b6b;
+            --dark-bg: #121212;
+            --dark-card: #1e1e1e;
+            --dark-text: #e0e0e0;
+            --dark-border: #333333;
+            --accent: #4cc9f0;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Vazirmatn', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #0c0e1d, #1a1f38);
-            color: #ffffff;
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e);
+            color: var(--dark-text);
+            line-height: 1.6;
             overflow-x: hidden;
-            min-height: 100vh;
             position: relative;
         }
         
-        /* Particle Background */
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        body::before {
+            content: "";
+            position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, rgba(76, 201, 240, 0.05) 0%, transparent 30%);
             z-index: -1;
+            pointer-events: none;
         }
         
-        /* Header Styles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ناوبری */
         header {
-            padding: 1.5rem 5%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            background: rgba(18, 18, 18, 0.8);
+            border-bottom: 1px solid rgba(51, 51, 51, 0.3);
+        }
+        
+        header.scrolled {
+            padding: 15px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            background: rgba(10, 12, 28, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
-            transition: all 0.3s ease;
         }
         
         .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #40e0d0;
-            text-decoration: none;
         }
         
         .logo i {
-            color: #00b4d8;
-            font-size: 2.2rem;
+            color: var(--secondary);
         }
         
-        nav ul {
+        .nav-links {
             display: flex;
-            list-style: none;
-            gap: 2.5rem;
+            gap: 30px;
         }
         
-        nav a {
+        .nav-links a {
+            color: var(--dark-text);
             text-decoration: none;
-            color: #e0e0ff;
             font-weight: 500;
-            font-size: 1.1rem;
             position: relative;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            padding: 5px 0;
         }
         
-        nav a:hover {
-            color: #40e0d0;
+        .nav-links a:hover {
+            color: var(--primary);
         }
         
-        nav a::after {
-            content: '';
+        .nav-links a::after {
+            content: "";
             position: absolute;
+            bottom: 0;
+            left: 0;
             width: 0;
             height: 2px;
-            bottom: -5px;
-            left: 0;
-            background: linear-gradient(90deg, #40e0d0, #00b4d8);
-            transition: width 0.3s ease;
+            background: var(--primary);
+            transition: var(--transition);
         }
         
-        nav a:hover::after {
+        .nav-links a:hover::after {
             width: 100%;
         }
         
-        .cta-button {
-            background: linear-gradient(90deg, #00b4d8, #40e0d0);
-            color: #0a0c1c;
-            padding: 0.8rem 2rem;
-            border-radius: 30px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
-        }
-        
-        /* Hero Section */
+        /* بخش هیرو */
         .hero {
-            padding: 15rem 5% 8rem;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            padding: 100px 0 50px;
             position: relative;
-            min-height: 100vh;
+            overflow: hidden;
         }
         
         .hero-content {
-            max-width: 600px;
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .hero-text {
+            flex: 1;
             animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            animation: fadeIn 1.5s ease-out;
         }
         
         .hero h1 {
             font-size: 3.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
             line-height: 1.2;
-            background: linear-gradient(90deg, #ffffff, #40e0d0);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        }
+        
+        .hero h1 span {
+            color: var(--primary);
+            position: relative;
+        }
+        
+        .hero h1 span::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--secondary);
+            border-radius: 3px;
         }
         
         .hero p {
             font-size: 1.2rem;
-            color: #b0b0ff;
-            margin-bottom: 2.5rem;
-            line-height: 1.8;
+            margin-bottom: 30px;
+            max-width: 600px;
+            opacity: 0.9;
         }
         
-        .hero-buttons {
-            display: flex;
-            gap: 1.5rem;
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: var(--primary);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: 2px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
         }
         
-        .hero-image {
-            position: relative;
-            width: 45%;
-            perspective: 1000px;
+        .btn:hover {
+            background: transparent;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.5);
         }
         
-        .hud-display {
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            margin-right: 15px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .code-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            background: rgba(20, 25, 60, 0.7);
-            border: 1px solid rgba(64, 224, 208, 0.3);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            transform: rotateY(-5deg) rotateX(10deg);
-            transition: transform 0.5s ease;
-            aspect-ratio: 1/1;
+            height: 150px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            z-index: -1;
         }
         
-        .hud-display:hover {
-            transform: rotateY(0) rotateX(0);
+        /* بخش مهارت‌ها */
+        .section {
+            padding: 100px 0;
         }
         
-        .hud-glass {
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
             position: relative;
-            padding: 2rem;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(10, 15, 40, 0.7), rgba(30, 35, 70, 0.5));
-            border-radius: 20px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         
-        .hud-glass::before {
-            content: '';
+        .section-title h2 {
+            font-size: 2.5rem;
+            display: inline-block;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-title h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .skill-card {
+            background: var(--dark-card);
+            border-radius: 15px;
+            padding: 30px;
+            transition: var(--transition);
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .skill-card::before {
+            content: "";
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(64, 224, 208, 0.1), transparent);
-            animation: hudGlow 4s linear infinite;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+            opacity: 0;
+            transition: var(--transition);
         }
         
-        .hud-content {
+        .skill-card:hover::before {
+            opacity: 1;
+        }
+        
+        .skill-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .skill-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .skill-card p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
             position: relative;
-            z-index: 2;
+        }
+        
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressGlow 1.5s infinite;
         }
         
-        .hud-speed {
-            font-size: 8rem;
-            font-weight: 900;
-            color: #40e0d0;
-            text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            letter-spacing: -5px;
-            text-align: center;
-            line-height: 1;
-        }
-        
-        .speed-label {
-            font-size: 1.5rem;
-            color: #b0b0ff;
-            text-align: center;
-            margin-top: 1rem;
-            letter-spacing: 2px;
-            animation: pulse 2s infinite;
-        }
-        
-        /* Features Section */
-        .features {
-            padding: 8rem 5%;
-            background: rgba(15, 18, 40, 0.6);
-        }
-        
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 5rem;
-            background: linear-gradient(90deg, #40e0d0, #00b4d8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            position: relative;
-        }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(90deg, #40e0d0, #00b4d8);
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-        
-        .features-grid {
+        /* بخش پروژه‌ها */
+        .projects-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
         }
         
-        .feature-card {
-            background: rgba(25, 30, 60, 0.7);
+        .project-card {
+            background: var(--dark-card);
             border-radius: 15px;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            transition: transform 0.3s ease;
-            border: 1px solid rgba(64, 224, 208, 0.2);
-            position: relative;
             overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
         
-        .feature-card:hover {
+        .project-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
+            border-color: var(--secondary);
         }
         
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #40e0d0, #00b4d8);
-        }
-        
-        .feature-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            color: #40e0d0;
-        }
-        
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-        
-        .feature-card p {
-            color: #b0b0ff;
-            line-height: 1.7;
-        }
-        
-        /* Demo Section */
-        .demo {
-            padding: 8rem 5%;
-            text-align: center;
-            position: relative;
-        }
-        
-        .demo-video {
-            width: 80%;
-            max-width: 900px;
-            height: 500px;
-            margin: 3rem auto 0;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(64, 224, 208, 0.3);
-            position: relative;
-        }
-        
-        .demo-video::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, rgba(0, 180, 216, 0.1), rgba(64, 224, 208, 0.1));
-            z-index: 1;
-        }
-        
-        .demo-placeholder {
-            background: linear-gradient(135deg, #1a1f38, #0c0e1d);
-            width: 100%;
-            height: 100%;
+        .project-img {
+            height: 200px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #40e0d0;
-            font-size: 1.5rem;
-            flex-direction: column;
-            gap: 1rem;
+            position: relative;
+            overflow: hidden;
         }
         
-        /* Footer */
+        .project-img i {
+            font-size: 5rem;
+            color: white;
+            opacity: 0.2;
+        }
+        
+        .project-content {
+            padding: 25px;
+        }
+        
+        .project-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .project-content p {
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        .project-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .project-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+        
+        .project-links a:hover {
+            color: var(--secondary);
+            transform: translateX(5px);
+        }
+        
+        /* بخش گواهینامه */
+        .certificate {
+            background: linear-gradient(to right, var(--dark-card), var(--dark-bg));
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .certificate-img {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .certificate-img img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--primary);
+        }
+        
+        .certificate-content {
+            flex: 1;
+        }
+        
+        .certificate-content h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .certificate-content p {
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        /* پاورقی */
         footer {
-            padding: 5rem 5% 2rem;
-            background: rgba(10, 12, 28, 0.9);
-            position: relative;
+            background: var(--dark-card);
+            padding: 70px 0 30px;
+            border-top: 1px solid var(--dark-border);
         }
         
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
+            gap: 40px;
+            margin-bottom: 50px;
         }
         
-        .footer-logo {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #40e0d0;
-            margin-bottom: 1.5rem;
-            display: inline-block;
+        .footer-col h4 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
         }
         
-        .footer-about p {
-            color: #b0b0ff;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
+        .footer-col h4::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
         }
         
         .social-links {
             display: flex;
-            gap: 1.2rem;
+            gap: 15px;
+            margin-top: 20px;
         }
         
         .social-links a {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
+            background: var(--dark-bg);
             border-radius: 50%;
-            background: rgba(64, 224, 208, 0.1);
-            color: #40e0d0;
+            color: var(--dark-text);
+            transition: var(--transition);
             font-size: 1.2rem;
-            transition: all 0.3s ease;
         }
         
         .social-links a:hover {
-            background: #40e0d0;
-            color: #0a0c1c;
+            background: var(--primary);
             transform: translateY(-5px);
         }
         
-        .footer-title {
-            font-size: 1.3rem;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
-            position: relative;
-            padding-bottom: 0.8rem;
-        }
-        
-        .footer-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, #40e0d0, #00b4d8);
-            border-radius: 3px;
-        }
-        
-        .footer-links {
+        .footer-col ul {
             list-style: none;
         }
         
-        .footer-links li {
-            margin-bottom: 1rem;
+        .footer-col ul li {
+            margin-bottom: 12px;
         }
         
-        .footer-links a {
+        .footer-col ul li a {
+            color: var(--dark-text);
             text-decoration: none;
-            color: #b0b0ff;
-            transition: all 0.3s ease;
-            display: inline-block;
+            transition: var(--transition);
+            opacity: 0.8;
         }
         
-        .footer-links a:hover {
-            color: #40e0d0;
-            transform: translateX(5px);
+        .footer-col ul li a:hover {
+            color: var(--primary);
+            padding-right: 10px;
+            opacity: 1;
         }
         
         .copyright {
             text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #b0b0ff;
-            font-size: 1rem;
+            padding-top: 30px;
+            border-top: 1px solid var(--dark-border);
+            opacity: 0.7;
         }
         
-        /* Animations */
+        /* انیمیشن‌ها */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes hudGlow {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
             }
         }
         
-        @keyframes pulse {
-            0% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-                text-shadow: 0 0 10px rgba(64, 224, 208, 0.8);
-            }
-            100% {
-                opacity: 0.5;
-            }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
         }
         
-        @keyframes speedChange {
-            0% {
-                transform: scale(1);
-                text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
-            }
-            50% {
-                transform: scale(1.05);
-                text-shadow: 0 0 30px rgba(64, 224, 208, 1);
-            }
-            100% {
-                transform: scale(1);
-                text-shadow: 0 0 20px rgba(64, 224, 208, 0.8);
-            }
+        @keyframes progressGlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         
-        /* Responsive Design */
+        /* رسپانسیو */
         @media (max-width: 992px) {
-            .hero {
+            .hero-content {
                 flex-direction: column;
-                padding-top: 10rem;
-                gap: 3rem;
+                text-align: center;
             }
             
-            .hero-content, .hero-image {
-                width: 100%;
-                max-width: 700px;
+            .hero-text {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero p {
+                max-width: 100%;
+            }
+            
+            .certificate {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
             }
             
             .hero h1 {
                 font-size: 2.8rem;
             }
             
-            .hud-speed {
-                font-size: 6rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            nav ul {
-                display: none;
-            }
-            
-            .hero h1 {
-                font-size: 2.3rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .hud-glass {
-                min-height: 300px;
-            }
-            
-            .hud-speed {
-                font-size: 4.5rem;
-            }
-            
-            .demo-video {
-                height: 300px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .hud-speed {
-                font-size: 3.5rem;
+            .section-title h2 {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Particle Background -->
-    <div id="particles-js"></div>
+    <!-- ذرات متحرک -->
+    <div class="particles" id="particles"></div>
     
-    <!-- Header -->
-    <header>
-        <a href="#" class="logo">
-            <i class="fas fa-car"></i>
-            <span>HUD Vision</span>
-        </a>
-        
-        <nav>
-            <ul>
-                <li><a href="#home">خانه</a></li>
-                <li><a href="#features">ویژگی‌ها</a></li>
-                <li><a href="#demo">دمو</a></li>
-                <li><a href="#download">دانلود</a></li>
-                <li><a href="#contact">تماس</a></li>
-            </ul>
-        </nav>
-        
-        <a href="#download" class="cta-button">دانلود رایگان</a>
+    <!-- هدر -->
+    <header id="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-code"></i>
+                    <span>امیر</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#home">خانه</a>
+                    <a href="#skills">مهارت‌ها</a>
+                    <a href="#projects">پروژه‌ها</a>
+                    <a href="#certificate">گواهینامه</a>
+                    <a href="#contact">تماس</a>
+                </div>
+            </nav>
+        </div>
     </header>
     
-    <!-- Hero Section -->
+    <!-- بخش اصلی -->
     <section class="hero" id="home">
-        <div class="hero-content">
-            <h1>نمایشگر هد آپ دیسپلی برای خودروی شما</h1>
-            <p>سرعت خودرو را به صورت زنده و با دقت بالا روی شیشه جلو مشاهده کنید. بدون نیاز به نگاه کردن به پنل خودرو، همیشه سرعت را در خط دید خود داشته باشید.</p>
-            
-            <div class="hero-buttons">
-                <a href="#download" class="cta-button">دانلود برای iOS</a>
-                <a href="#download" class="cta-button" style="background: linear-gradient(90deg, #7b68ee, #6a5acd);">دانلود برای اندروید</a>
-            </div>
-        </div>
-        
-        <div class="hero-image">
-            <div class="hud-display">
-                <div class="hud-glass">
-                    <div class="hud-content">
-                        <div class="hud-speed">85</div>
-                        <div class="speed-label">کیلومتر بر ساعت</div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>سلام، من <span>امیر</span> هستم</h1>
+                    <p>یک برنامه‌نویس پرشور پایتون و توسعه‌دهنده اندروید که عاشق خلق راهکارهای نوآورانه و زیبا است. من در B4A، پایتون و Flutter تخصص دارم و همیشه در حال یادگیری و بهبود مهارت‌هایم هستم.</p>
+                    <div class="hero-buttons">
+                        <a href="#projects" class="btn btn-secondary">پروژه‌های من</a>
+                        <a href="#contact" class="btn">تماس با من</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="animated-code">
+                        <div class="code-bg"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
     
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <h2 class="section-title">ویژگی‌های منحصر به فرد</h2>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="feature-icon fas fa-tachometer-alt"></i>
-                <h3>نمایشگر سرعت بزرگ</h3>
-                <p>سرعت خودرو با فونت بسیار بزرگ در مرکز نمایشگر، کاملاً واضح و خوانا حتی در نور روز</p>
+    <!-- بخش مهارت‌ها -->
+    <section class="section" id="skills">
+        <div class="container">
+            <div class="section-title">
+                <h2>مهارت‌های تخصصی</h2>
             </div>
-            
-            <div class="feature-card">
-                <i class="feature-icon fas fa-sun"></i>
-                <h3>تطبیق با نور محیط</h3>
-                <p>نمایشگر به صورت خودکار با نور محیط تطبیق می‌یابد تا همیشه خوانایی مطلوب داشته باشد</p>
-            </div>
-            
-            <div class="feature-card">
-                <i class="feature-icon fas fa-bell"></i>
-                <h3>هشدار سرعت مجاز</h3>
-                <p>هشدار لحظه‌ای هنگام نزدیک شدن به سرعت مجاز جاده‌ها</p>
-            </div>
-            
-            <div class="feature-card">
-                <i class="feature-icon fas fa-road"></i>
-                <h3>تشخیص نوع جاده</h3>
-                <p>تشخیص خودکار بزرگراه، آزادراه و جاده‌های شهری و نمایش سرعت مجاز</p>
-            </div>
-            
-            <div class="feature-card">
-                <i class="feature-icon fas fa-palette"></i>
-                <h3>رنگ‌های قابل تنظیم</h3>
-                <p>انتخاب از بین ۱۲ رنگ مختلف برای نمایشگر سرعت با توجه به سلیقه شما</p>
-            </div>
-            
-            <div class="feature-card">
-                <i class="feature-icon fas fa-battery-full"></i>
-                <h3>مصرف بهینه انرژی</h3>
-                <p>طراحی شده برای مصرف حداقلی باتری تلفن همراه</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Demo Section -->
-    <section class="demo" id="demo">
-        <h2 class="section-title">نمایش عملکرد برنامه</h2>
-        
-        <div class="demo-video">
-            <div class="demo-placeholder">
-                <i class="fas fa-play-circle" style="font-size: 4rem;"></i>
-                <p>نمایش ویدئویی از برنامه در حال اجرا</p>
+            <div class="skills-container">
+                <div class="skill-card">
+                    <div class="skill-icon">
+                        <i class="fab fa-python"></i>
+                    </div>
+                    <h3>توسعه پایتون</h3>
+                    <p>توسعه برنامه‌های کاربردی، اسکریپت‌های خودکارسازی و راهکارهای مبتنی بر داده با پایتون</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 96%"></div>
+                    </div>
+                    <span>96% مهارت</span>
+                </div>
+                
+                <div class="skill-card">
+                    <div class="skill-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>توسعه اندروید با B4A</h3>
+                    <p>ساخت اپلیکیشن‌های اندرویدی حرفه‌ای با استفاده از Basic4Android</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 100%"></div>
+                    </div>
+                    <span>100% مهارت</span>
+                </div>
+                
+                <div class="skill-card">
+                    <div class="skill-icon">
+                        <i class="fab fa-flutter"></i>
+                    </div>
+                    <h3>توسعه با Flutter</h3>
+                    <p>ساخت اپلیکیشن‌های چندسکویی زیبا و پرسرعت با Flutter</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 75%"></div>
+                    </div>
+                    <span>75% مهارت</span>
+                </div>
             </div>
         </div>
     </section>
     
-    <!-- Footer -->
+    <!-- بخش پروژه‌ها -->
+    <section class="section" id="projects" style="background: rgba(0, 0, 0, 0.05);">
+        <div class="container">
+            <div class="section-title">
+                <h2>پروژه‌های اخیر</h2>
+            </div>
+            <div class="projects-container">
+                <div class="project-card">
+                    <div class="project-img">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>پروژه‌های GitHub</h3>
+                        <p>مخزن GitHub من حاوی پروژه‌های متنوعی در زمینه‌های پایتون، اتوماسیون، توسعه وب و اپلیکیشن‌های اندروید است.</p>
+                        <div class="project-links">
+                            <a href="https://github.com/pythoncoder1389" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> مشاهده مخزن
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-img">
+                        <i class="fab fa-android"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>اپلیکیشن‌های Myket</h3>
+                        <p>اپلیکیشن‌های منتشر شده من در فروشگاه Myket که با B4A و Android Studio توسعه داده شده‌اند.</p>
+                        <div class="project-links">
+                            <a href="https://myket.ir/developer/dev-98486" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> مشاهده اپلیکیشن‌ها
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-img">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>پروژه‌های پایتون</h3>
+                        <p>مجموعه‌ای از پروژه‌های پایتون شامل ابزارهای خودکارسازی، تحلیل داده و اسکریپت‌های کاربردی.</p>
+                        <div class="project-links">
+                            <a href="https://github.com/pythoncoder1389?tab=repositories" target="_blank">
+                                <i class="fab fa-github"></i> مشاهده پروژه‌ها
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- بخش گواهینامه -->
+    <section class="section" id="certificate">
+        <div class="container">
+            <div class="section-title">
+                <h2>گواهینامه پایتون</h2>
+            </div>
+            <div class="certificate">
+                <div class="certificate-img">
+                    <img src="cer.jpeg" alt="گواهینامه پایتون">
+                </div>
+                <div class="certificate-content">
+                    <h3>گواهینامه تخصصی پایتون</h3>
+                    <p>این گواهینامه نشان دهنده تسلط من بر زبان برنامه‌نویسی پایتون و توانایی‌هایم در توسعه راهکارهای نرم‌افزاری با این زبان قدرتمند است.</p>
+                    <p>مهارت‌های اثبات شده شامل توسعه برنامه‌های کاربردی، کار با کتابخانه‌های استاندارد، توسعه وب، تحلیل داده و اتوماسیون فرآیندها می‌باشد.</p>
+                    <a href="cer.jpeg" class="btn" download>دانلود گواهینامه</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- پاورقی -->
     <footer id="contact">
-        <div class="footer-content">
-            <div class="footer-about">
-                <a href="#" class="footer-logo">
-                    <i class="fas fa-car"></i> HUD Vision
-                </a>
-                <p>نمایشگر هد آپ پیشرفته برای افزایش ایمنی و راحتی رانندگی. سرعت خودرو را به صورت زنده و در خط دید خود مشاهده کنید.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-telegram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>درباره من</h4>
+                    <p>یک برنامه‌نویس پرشور که عاشق حل مسائل پیچیده با کد است. من در توسعه پایتون و اپلیکیشن‌های موبایل تخصص دارم و همیشه در حال یادگیری تکنولوژی‌های جدید هستم.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/pythoncoder1389" target="_blank"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>لینک‌های مفید</h4>
+                    <ul>
+                        <li><a href="#home">خانه</a></li>
+                        <li><a href="#skills">مهارت‌ها</a></li>
+                        <li><a href="#projects">پروژه‌ها</a></li>
+                        <li><a href="#certificate">گواهینامه</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>پروژه‌های من</h4>
+                    <ul>
+                        <li><a href="https://github.com/pythoncoder1389" target="_blank">پروژه‌های GitHub</a></li>
+                        <li><a href="https://myket.ir/developer/dev-98486" target="_blank">اپلیکیشن‌های Myket</a></li>
+                        <li><a href="#">پروژه‌های پایتون</a></li>
+                        <li><a href="#">اپلیکیشن‌های B4A</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>تماس با من</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> mhman884@gmail.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> ایران ، آذربایجان شرقی ، مراغه</li>
+                        <li><i class="fas fa-code"></i> Python, B4A, Android</li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="footer-links">
-                <h3 class="footer-title">لینک‌های سریع</h3>
-                <ul>
-                    <li><a href="#home">صفحه اصلی</a></li>
-                    <li><a href="#features">ویژگی‌ها</a></li>
-                    <li><a href="#demo">دمو</a></li>
-                    <li><a href="#download">دانلود</a></li>
-                    <li><a href="#contact">تماس با ما</a></li>
-                </ul>
+            <div class="copyright">
+                <p>&copy; 2025 ساخته شده با ❤️ توسط امیر. تمام حقوق محفوظ است.</p>
             </div>
-            
-            <div class="footer-links">
-                <h3 class="footer-title">پشتیبانی</h3>
-                <ul>
-                    <li><a href="#">نصب و راه‌اندازی</a></li>
-                    <li><a href="#">سوالات متداول</a></li>
-                    <li><a href="#">راهنمای استفاده</a></li>
-                    <li><a href="#">گزارش مشکل</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-links">
-                <h3 class="footer-title">تماس با ما</h3>
-                <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> تهران، خیابان آزادی، پلاک ۱۲۳</li>
-                    <li><i class="fas fa-phone"></i> ۰۲۱-۱۲۳۴۵۶۷۸</li>
-                    <li><i class="fas fa-envelope"></i> info@hudvision.ir</li>
-                    <li><i class="fas fa-clock"></i> شنبه تا چهارشنبه: ۹ صبح تا ۵ عصر</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="copyright">
-            © 2025 AmirSoftware. تمامی حقوق محفوظ است.
         </div>
     </footer>
     
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Initialize particles background
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: "#40e0d0" },
-                shape: { type: "circle" },
-                opacity: { value: 0.5, random: true },
-                size: { value: 3, random: true },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: "#00b4d8",
-                    opacity: 0.3,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 2,
-                    direction: "none",
-                    random: true,
-                    straight: false,
-                    out_mode: "out"
-                }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: true, mode: "grab" },
-                    onclick: { enable: true, mode: "push" },
-                    resize: true
-                }
-            },
-            retina_detect: true
-        });
-        
-        // Header scroll effect
-        window.addEventListener("scroll", function() {
-            const header = document.querySelector("header");
-            if (window.scrollY > 100) {
-                header.style.padding = "1rem 5%";
-                header.style.background = "rgba(10, 12, 28, 0.95)";
-            } else {
-                header.style.padding = "1.5rem 5%";
-                header.style.background = "rgba(10, 12, 28, 0.8)";
-            }
-        });
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
+        // ذرات متحرک
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            const particlesCount = 100;
+            
+            for (let i = 0; i < particlesCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.background = i % 3 === 0 ? 'var(--primary)' : 
+                                          i % 3 === 1 ? 'var(--secondary)' : 'var(--accent)';
+                particle.style.borderRadius = '50%';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+                
+                // انیمیشن حرکت ذرات
+                particle.animate([
+                    { transform: 'translate(0, 0)' },
+                    { transform: `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px)` },
+                    { transform: 'translate(0, 0)' }
+                ], {
+                    duration: Math.random() * 10000 + 10000,
+                    iterations: Infinity
                 });
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // انیمیشن اسکرول هدر
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('header');
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // انیمیشن اسکرول برای بخش‌ها
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.skill-card, .project-card').forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
             });
         });
-        
-        // HUD speed simulation
-        setInterval(() => {
-            const hudSpeed = document.querySelector('.hud-speed');
-            const currentSpeed = parseInt(hudSpeed.textContent);
-            const newSpeed = Math.floor(Math.random() * 40) + 40;
-            
-            // Animate speed change
-            let speed = currentSpeed;
-            const interval = setInterval(() => {
-                if (speed < newSpeed) speed++;
-                else if (speed > newSpeed) speed--;
-                else clearInterval(interval);
-                
-                hudSpeed.textContent = speed;
-                
-                // Add animation effect when speed changes
-                if (Math.abs(speed - currentSpeed) > 5) {
-                    hudSpeed.style.animation = "speedChange 0.5s ease";
-                    setTimeout(() => {
-                        hudSpeed.style.animation = "";
-                    }, 500);
-                }
-            }, 30);
-        }, 5000);
     </script>
 </body>
 </html>
